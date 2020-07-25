@@ -5,16 +5,34 @@ namespace GoodFoodIncAPI.Models
 {
     public partial class Ingredient
     {
-        public Ingredient()
-        {
-            IngredientInfo = new HashSet<IngredientInfo>();
-        }
+
+        private string _title;
+        private string _slug;
 
         public int IngredientId { get; set; }
-        public string Title { get; set; }
+        public string Title
+        {
+            get => _title;
+            set
+            {
+                _title = value;
+                _slug = $"{UserId}-{_title}";
+            }
+        }
+        public string Slug
+        {
+            get => _slug;
+        }
         public string Description { get; set; }
-        public string Slug { get; set; }
+        public int UserId { get; set; }
 
-        public ICollection<IngredientInfo> IngredientInfo { get; set; }
+        public Ingredient()
+        {
+            IngredientInfoes = new HashSet<IngredientInfo>();
+        }
+
+        //Navigation properties
+        public User User { get; set; }
+        public ICollection<IngredientInfo> IngredientInfoes { get; set; }
     }
 }

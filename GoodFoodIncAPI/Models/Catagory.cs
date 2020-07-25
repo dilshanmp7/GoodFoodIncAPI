@@ -7,12 +7,12 @@ namespace GoodFoodIncAPI.Models
     {
         public Catagory()
         {
-            Recipe = new HashSet<Recipe>();
+            Recipes = new HashSet<Recipe>();
         }
 
         public int CatagoryId { get; set; }
         public string Name { get; set; }
 
-        public ICollection<Recipe> Recipe { get; set; }
+        public ICollection<Recipe> Recipes { get; set; }
     }
 }

@@ -3,22 +3,38 @@ using System.Collections.Generic;
 
 namespace GoodFoodIncAPI.Models
 {
-    public partial class Recipe
+    public class Recipe
     {
+        private string _title;
+        private string _slug;
+
         public Recipe()
         {
-            IngredientInfo = new HashSet<IngredientInfo>();
+            IngredientInfoes = new HashSet<IngredientInfo>();
         }
 
         public int RecipeId { get; set; }
-        public string Title { get; set; }
-        public string Slug { get; set; }
+        public string Title
+        {
+            get => _title;
+            set
+            {
+                _title = value;
+                _slug = $"{UserId}-{_title}";
+            }
+        }
+        public string Slug
+        {
+            get => _slug;
+        }
+
         public int CatagoryId { get; set; }
         public string Description { get; set; }
-        public int IngredientInfoId { get; set; }
+        public int UserId { get; set; }
 
+        //Navigation Properties
         public Catagory Catagory { get; set; }
-        public IngredientInfo IngredientInfoNavigation { get; set; }
-        public ICollection<IngredientInfo> IngredientInfo { get; set; }
+        public User User { get; set; }
+        public ICollection<IngredientInfo> IngredientInfoes { get; set; }
     }
 }

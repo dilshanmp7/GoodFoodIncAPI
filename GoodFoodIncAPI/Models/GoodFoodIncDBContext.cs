@@ -15,18 +15,17 @@ namespace GoodFoodIncAPI.Models
         {
         }
 
-        public virtual DbSet<Catagory> Catagory { get; set; }
-        public virtual DbSet<Ingredient> Ingredient { get; set; }
-        public virtual DbSet<IngredientInfo> IngredientInfo { get; set; }
-        public virtual DbSet<Recipe> Recipe { get; set; }
-        public virtual DbSet<User> User { get; set; }
+        public virtual DbSet<Catagory> Catagories { get; set; }
+        public virtual DbSet<Ingredient> Ingredients { get; set; }
+        public virtual DbSet<IngredientInfo> IngredientInfoes { get; set; }
+        public virtual DbSet<Recipe> Recipes { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=ENV-ENV767\\SQLSERVER2019;Initial Catalog=GoodFoodIncDB;Integrated Security=True");
+                optionsBuilder.UseSqlServer("Name=GoodFoodIncDB");
             }
         }
 
@@ -34,6 +33,8 @@ namespace GoodFoodIncAPI.Models
         {
             modelBuilder.Entity<Catagory>(entity =>
             {
+                entity.ToTable("Catagory");
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(20);
@@ -41,6 +42,8 @@ namespace GoodFoodIncAPI.Models
 
             modelBuilder.Entity<Ingredient>(entity =>
             {
+                entity.ToTable("Ingredient");
+
                 entity.Property(e => e.Slug)
                     .IsRequired()
                     .HasMaxLength(50);
@@ -48,22 +51,30 @@ namespace GoodFoodIncAPI.Models
                 entity.Property(e => e.Title)
                     .IsRequired()
                     .HasMaxLength(90);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Ingredients)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Ingredient_User");
             });
 
             modelBuilder.Entity<IngredientInfo>(entity =>
             {
+                entity.ToTable("IngredientInfo");
+
                 entity.Property(e => e.Qty)
                     .IsRequired()
                     .HasMaxLength(10);
 
                 entity.HasOne(d => d.Ingredient)
-                    .WithMany(p => p.IngredientInfo)
+                    .WithMany(p => p.IngredientInfoes)
                     .HasForeignKey(d => d.IngredientId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_IngredientInfo_Ingredient");
 
                 entity.HasOne(d => d.Recipe)
-                    .WithMany(p => p.IngredientInfo)
+                    .WithMany(p => p.IngredientInfoes)
                     .HasForeignKey(d => d.RecipeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_IngredientInfo_Recipe");
@@ -71,6 +82,8 @@ namespace GoodFoodIncAPI.Models
 
             modelBuilder.Entity<Recipe>(entity =>
             {
+                entity.ToTable("Recipe");
+
                 entity.Property(e => e.Slug)
                     .IsRequired()
                     .HasMaxLength(50);
@@ -80,20 +93,22 @@ namespace GoodFoodIncAPI.Models
                     .HasMaxLength(90);
 
                 entity.HasOne(d => d.Catagory)
-                    .WithMany(p => p.Recipe)
+                    .WithMany(p => p.Recipes)
                     .HasForeignKey(d => d.CatagoryId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Recipe_Catagory");
 
-                entity.HasOne(d => d.IngredientInfoNavigation)
-                    .WithMany(p => p.RecipeNavigation)
-                    .HasForeignKey(d => d.IngredientInfoId)
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Recipes)
+                    .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Recipe_IngredientInfo");
+                    .HasConstraintName("FK_Recipe_User");
             });
 
             modelBuilder.Entity<User>(entity =>
             {
+                entity.ToTable("User");
+
                 entity.Property(e => e.Password)
                     .IsRequired()
                     .HasMaxLength(10);
