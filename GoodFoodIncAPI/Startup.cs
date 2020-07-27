@@ -29,7 +29,7 @@ namespace GoodFoodIncAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            services.AddCors();
             services.AddSwaggerGen(a =>
             {
                 a.SwaggerDoc("v1", new OpenApiInfo()
@@ -53,11 +53,16 @@ namespace GoodFoodIncAPI
                 {
                     options.SerializerSettings.Formatting = Formatting.None;
                 });
+
+            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseCors(opt => opt.WithOrigins("http://localhost:3000/").AllowAnyHeader().AllowAnyMethod());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

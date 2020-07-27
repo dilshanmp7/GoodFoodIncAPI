@@ -39,6 +39,7 @@ namespace GoodFoodIncAPI.Controllers
         {
             var recipeModel = new RecipesRespondModel
             {
+                Id = recipe.RecipeId,
                 Title = recipe.Title,
                 Description = recipe.Description,
                 Category = _context.Catagories.First(a => a.CatagoryId.Equals(recipe.CatagoryId)).Name,
@@ -48,7 +49,7 @@ namespace GoodFoodIncAPI.Controllers
                 .Select(a => new {a.IngredientId,a.Qty});
             foreach (var kvp in queryable)
             {
-                recipeModel.Ingredients.Add(new KeyValuePair<string, string>(_context.Ingredients.First(a => a.IngredientId.Equals(kvp.IngredientId)).Title,kvp.Qty));
+                recipeModel.Ingredients[_context.Ingredients.First(a => a.IngredientId.Equals(kvp.IngredientId)).Title] =kvp.Qty;
             }
             return recipeModel;
         }
@@ -77,10 +78,7 @@ namespace GoodFoodIncAPI.Controllers
             }
             return Ok(recipesModels);
         }
-
-
-
-
+        
         // GET: api/Recipes/5
         [HttpGet("{id}")] 
         public async Task<IActionResult> GetRecipeByID([FromRoute] int id)

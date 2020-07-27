@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace GoodFoodIncAPI.Models
 {
@@ -14,6 +15,7 @@ namespace GoodFoodIncAPI.Models
         }
 
         public int RecipeId { get; set; }
+        [MaxLength(90)]
         public string Title
         {
             get => _title;
@@ -23,6 +25,7 @@ namespace GoodFoodIncAPI.Models
                 _slug = $"{UserId}-{_title}";
             }
         }
+        [MaxLength(50)]
         public string Slug
         {
             get => _slug;

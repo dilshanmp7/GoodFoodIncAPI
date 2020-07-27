@@ -9,15 +9,16 @@ namespace GoodFoodIncAPI.Response
 {
     public class RecipesRespondModel
     {
+        public int Id { get; set; }
         public string Title { get; set; }
         public string Category { get; set; }
         public string Description { get; set; }
-        public List<KeyValuePair<string,string>> Ingredients { get; set; }
+        public Dictionary<string,string> Ingredients { get; set; }
         public string Owner { get; set; }
 
         public RecipesRespondModel()
         {
-            Ingredients = new List<KeyValuePair<string, string>>();
+            Ingredients = new Dictionary<string, string>();
         }
     }
 }
