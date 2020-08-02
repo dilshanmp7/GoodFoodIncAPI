@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.1169
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoodFoodIncAPI", "GoodFoodIncAPI\GoodFoodIncAPI.csproj", "{8761B30C-D035-4379-9C22-F5661F7DA20B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XUnitTestProject1", "XUnitTestProject1\XUnitTestProject1.csproj", "{B4A04F20-4AC3-4401-82B2-1366ADC45AE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTest", "XUnitTestProject1\IntegrationTest.csproj", "{B4A04F20-4AC3-4401-82B2-1366ADC45AE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

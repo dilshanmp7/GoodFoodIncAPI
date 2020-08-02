@@ -49,31 +49,6 @@ namespace XUnitTestProject1
             getresponse.StatusCode.Should().Be(HttpStatusCode.OK);
             (await getresponse.Content.ReadAsAsync<List<IngredientRespondModel>>()).Should().HaveCount(1);
         }
-
-
-        [Fact]
-        public async void UpdateIngredients_ReturnIngredients_WhenExistsInDB()
-        {
-            //Act
-            IngredientRespondModel testIngredient = new IngredientRespondModel()
-            {
-                Title = "Test_Ingredient_1",
-                Description = "This is a Test value",
-                Owner = "testUser"
-            };
-            var stringIngredient = await Task.Run(() => JsonConvert.SerializeObject(testIngredient));
-            var httpContent = new StringContent(stringIngredient, Encoding.UTF8, "application/json");
-            var postResponse = await TestClient.PostAsync("https://localhost:44300/Ingredients", httpContent);
-
-            //Assert
-            postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-
-            var getResponse = await TestClient.GetAsync("https://localhost:44300/Ingredients");
-
-            getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            (await getResponse.Content.ReadAsAsync<List<IngredientRespondModel>>()).Should().HaveCount(1);
-        }
-
         [Fact]
         public async void UpdateIngredients_WhenExistsInDB()
         {

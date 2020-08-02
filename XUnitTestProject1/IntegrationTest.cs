@@ -18,8 +18,11 @@ namespace XUnitTestProject1
     {
         protected readonly HttpClient TestClient;
 
+        protected GoodFoodIncDBContext Context;
+
         protected IntegrationTest()
         {
+            ServiceProvider sp = null;
             var applicationFactory = new WebApplicationFactory<Startup>()
                 .WithWebHostBuilder(builder =>
                 {
@@ -30,11 +33,28 @@ namespace XUnitTestProject1
                         {
                             opt.UseInMemoryDatabase("TestDB");
                         });
-                        
+                        sp = services.BuildServiceProvider();
+                        using (var scope = sp.CreateScope())
+                        {
+                            var scopeServiceProvider = scope.ServiceProvider;
+                            Context = scopeServiceProvider.GetRequiredService<GoodFoodIncDBContext>();
+                            Context.Database.EnsureCreated();
+                            InitializeDB(Context);
+                        }
                     });
                 });
+
             TestClient = applicationFactory.CreateClient();
         }
 
+        private void InitializeDB(GoodFoodIncDBContext db)
+        {
+            // add defult test user
+            db.Users.Add(new User() {UserName = "testUser", Password = "12345"});
+            db.Catagories.Add(new Catagory(){Name = "starters" });
+            db.Catagories.Add(new Catagory() { Name = "main course" });
+            db.Catagories.Add(new Catagory() { Name = "dessert" });
+            db.SaveChanges();
+        }
     }
 }
