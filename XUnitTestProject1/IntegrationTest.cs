@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using GoodFoodIncAPI;
 using GoodFoodIncAPI.Models;
+using IntegrationTest;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -14,47 +15,42 @@ using Xunit;
 
 namespace XUnitTestProject1
 {
-    public class IntegrationTest
+    public class IntegrationTest: IClassFixture<CustomWebApplicationFactory<Startup>>
     {
-        protected readonly HttpClient TestClient;
 
+        protected readonly HttpClient Client;
         protected GoodFoodIncDBContext Context;
+        protected readonly CustomWebApplicationFactory<Startup> Factory;
 
-        protected IntegrationTest()
+        public IntegrationTest(CustomWebApplicationFactory<Startup> factory)
         {
-            ServiceProvider sp = null;
-            var applicationFactory = new WebApplicationFactory<Startup>()
-                .WithWebHostBuilder(builder =>
-                {
-                    builder.ConfigureServices(services =>
-                    {
-                        services.RemoveAll(typeof(GoodFoodIncDBContext));
-                        services.AddDbContext<GoodFoodIncDBContext>(opt =>
-                        {
-                            opt.UseInMemoryDatabase("TestDB");
-                        });
-                        sp = services.BuildServiceProvider();
-                        using (var scope = sp.CreateScope())
-                        {
-                            var scopeServiceProvider = scope.ServiceProvider;
-                            Context = scopeServiceProvider.GetRequiredService<GoodFoodIncDBContext>();
-                            Context.Database.EnsureCreated();
-                            InitializeDB(Context);
-                        }
-                    });
-                });
-
-            TestClient = applicationFactory.CreateClient();
+            Factory = factory;
+            Client = Factory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                AllowAutoRedirect = true
+            });
+            var scopeFactory = Factory.Server.Host.Services.GetService<IServiceScopeFactory>();
+            var scope = scopeFactory.CreateScope();
+            Context = scope.ServiceProvider.GetService<GoodFoodIncDBContext>();
         }
 
-        private void InitializeDB(GoodFoodIncDBContext db)
+
+        [Theory]
+        [InlineData("/Ingredients")]
+        [InlineData("/Recipes")]
+        public async Task GetHttpRequest(string url)
         {
-            // add defult test user
-            db.Users.Add(new User() {UserName = "testUser", Password = "12345"});
-            db.Catagories.Add(new Catagory(){Name = "starters" });
-            db.Catagories.Add(new Catagory() { Name = "main course" });
-            db.Catagories.Add(new Catagory() { Name = "dessert" });
-            db.SaveChanges();
+            // Arrange
+            var client = Factory.CreateClient();
+
+            //Act
+            var response = await client.GetAsync(url);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
+
         }
+
     }
 }

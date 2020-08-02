@@ -20,24 +20,10 @@ using Xunit;
 
 namespace XUnitTestProject1
 {
-    public class RecipesControllerTest : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class RecipesControllerTest : IntegrationTest
     {
-
-        private readonly HttpClient _client;
-        private IServiceScopeFactory scopeFactory;
-        private GoodFoodIncDBContext _context;
-        private readonly CustomWebApplicationFactory<Startup> _factory;
-
-        public RecipesControllerTest(CustomWebApplicationFactory<Startup> factory)
+        public RecipesControllerTest(CustomWebApplicationFactory<Startup> factory) : base(factory)
         {
-            _factory = factory;
-            _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = true
-            });
-            scopeFactory = _factory.Server.Host.Services.GetService<IServiceScopeFactory>();
-            var scope = scopeFactory.CreateScope();
-            _context = scope.ServiceProvider.GetService<GoodFoodIncDBContext>();
         }
 
         [Theory]
@@ -45,7 +31,7 @@ namespace XUnitTestProject1
         public async void GetAllRecipes_WithoutAnyRecipes_ReturnEmpty(string url)
         {
             //Act
-            var response = await _client.GetAsync(url);
+            var response = await Client.GetAsync(url);
             //Assert
             response.EnsureSuccessStatusCode();
             Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
@@ -59,8 +45,8 @@ namespace XUnitTestProject1
         public async void PostRecipes_ReturnRecipes_WhenExistsInDB(string url)
         {
             //Act
-            Utilities.InitializeUserAndCatagoryTestData(_context);
-            Utilities.InitializeIngredientTestData(_context);
+            Utilities.InitializeUserAndCatagoryTestData(Context);
+            Utilities.InitializeIngredientTestData(Context);
             RecipesRespondModel testRespondModel = new RecipesRespondModel()
             {
                 Ingredients = new Dictionary<string, string>()
@@ -76,12 +62,12 @@ namespace XUnitTestProject1
 
             var stringRecipes = await Task.Run(() => JsonConvert.SerializeObject(testRespondModel));
             var httpContent = new StringContent(stringRecipes, Encoding.UTF8, "application/json");
-            var postResponse = await _client.PostAsync(url, httpContent);
+            var postResponse = await Client.PostAsync(url, httpContent);
 
             //Assert
             postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            var getResponse = await _client.GetAsync(url);
+            var getResponse = await Client.GetAsync(url);
 
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             (await getResponse.Content.ReadAsAsync<List<RecipesRespondModel>>()).Should().HaveCount(1);
@@ -93,8 +79,8 @@ namespace XUnitTestProject1
         public async void UpdateRecipes_WhenExistsInDB(string url)
         {
             //Act
-            Utilities.InitializeUserAndCatagoryTestData(_context);
-            Utilities.InitializeIngredientTestData(_context);
+            Utilities.InitializeUserAndCatagoryTestData(Context);
+            Utilities.InitializeIngredientTestData(Context);
             RecipesRespondModel testRespondModel = new RecipesRespondModel()
             {
                 Ingredients = new Dictionary<string, string>()
@@ -110,12 +96,12 @@ namespace XUnitTestProject1
 
             var stringRecipes = await Task.Run(() => JsonConvert.SerializeObject(testRespondModel));
             var httpContent = new StringContent(stringRecipes, Encoding.UTF8, "application/json");
-            var postResponse = await _client.PostAsync(url, httpContent);
+            var postResponse = await Client.PostAsync(url, httpContent);
 
             //Assert
             postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            var getResponse = await _client.GetAsync($"{url}/1");
+            var getResponse = await Client.GetAsync($"{url}/1");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             var existingItem = JsonConvert.DeserializeObject<RecipesRespondModel>(await getResponse.Content.ReadAsStringAsync());
 
@@ -131,10 +117,10 @@ namespace XUnitTestProject1
             stringRecipes = await Task.Run(() => JsonConvert.SerializeObject(existingItem));
             httpContent = new StringContent(stringRecipes, Encoding.UTF8, "application/json");
 
-            var putResponse = await _client.PutAsync($"{url}/1", httpContent);
+            var putResponse = await Client.PutAsync($"{url}/1", httpContent);
             putResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-            getResponse = await _client.GetAsync($"{url}/1");
+            getResponse = await Client.GetAsync($"{url}/1");
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             existingItem = JsonConvert.DeserializeObject<RecipesRespondModel>(await getResponse.Content.ReadAsStringAsync());
 
@@ -153,8 +139,8 @@ namespace XUnitTestProject1
         public async void DeleteRecipes_WhenExistsInDB(string url)
         {
             //Act
-            Utilities.InitializeUserAndCatagoryTestData(_context);
-            Utilities.InitializeIngredientTestData(_context);
+            Utilities.InitializeUserAndCatagoryTestData(Context);
+            Utilities.InitializeIngredientTestData(Context);
             RecipesRespondModel testRespondModel = new RecipesRespondModel()
             {
                 Ingredients = new Dictionary<string, string>()
@@ -170,20 +156,20 @@ namespace XUnitTestProject1
 
             var stringRecipes = await Task.Run(() => JsonConvert.SerializeObject(testRespondModel));
             var httpContent = new StringContent(stringRecipes, Encoding.UTF8, "application/json");
-            var postResponse = await _client.PostAsync(url, httpContent);
+            var postResponse = await Client.PostAsync(url, httpContent);
 
             //Assert
             postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            var getResponse = await _client.GetAsync(url);
+            var getResponse = await Client.GetAsync(url);
 
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             (await getResponse.Content.ReadAsAsync<List<RecipesRespondModel>>()).Should().HaveCount(1);
 
-            var deleteResponse = await _client.DeleteAsync($"{url}/1");
+            var deleteResponse = await Client.DeleteAsync($"{url}/1");
             deleteResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            getResponse = await _client.GetAsync(url);
+            getResponse = await Client.GetAsync(url);
 
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             (await getResponse.Content.ReadAsAsync<List<RecipesRespondModel>>()).Should().HaveCount(0);
@@ -195,8 +181,8 @@ namespace XUnitTestProject1
         public async void GetRecipesByUserID_WhenExistsInDB(string url)
         {
             //Act
-            Utilities.InitializeUserAndCatagoryTestData(_context);
-            Utilities.InitializeIngredientTestData(_context);
+            Utilities.InitializeUserAndCatagoryTestData(Context);
+            Utilities.InitializeIngredientTestData(Context);
             RecipesRespondModel testRespondModel = new RecipesRespondModel()
             {
                 Ingredients = new Dictionary<string, string>()
@@ -212,12 +198,12 @@ namespace XUnitTestProject1
 
             var stringRecipes = await Task.Run(() => JsonConvert.SerializeObject(testRespondModel));
             var httpContent = new StringContent(stringRecipes, Encoding.UTF8, "application/json");
-            var postResponse = await _client.PostAsync(url, httpContent);
+            var postResponse = await Client.PostAsync(url, httpContent);
 
             //Assert
             postResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            var getResponse = await _client.GetAsync($"{url}/1/users");
+            var getResponse = await Client.GetAsync($"{url}/1/users");
 
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -226,5 +212,6 @@ namespace XUnitTestProject1
 
         }
 
+        
     }
 }
